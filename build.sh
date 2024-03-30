@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Создаем директорию для сборки
+mkdir build libs
 cd build
 
 # Генерируем файлы сборки с помощью CMake
