@@ -1,5 +1,5 @@
-import pickle
-
+import argparse
+import os
 import ctypes
 
 # Загрузка библиотеки
@@ -43,7 +43,7 @@ def load(file_name):
 
 
 
-def dump(dict):
+def dump(dict, file_out):
     numbers = []
     symbols = []
     for x in dict:
@@ -52,7 +52,7 @@ def dump(dict):
 
     numbers_c = (ctypes.c_int * len(numbers))(*numbers)
     symbols_c = bytes(symbols)
-    my_lib.my_dump(numbers_c, symbols_c, len(numbers))
+    my_lib.my_dump(file_out.encode(), numbers_c, symbols_c, len(numbers))
 
 
 def compression(string):  # string is your input text
@@ -96,7 +96,7 @@ def parse(data):
         dict[index] = lst
         index += 1
 
-    return dict, data.numbers[data.size-1]
+    return dict, data.numbers[data.size - 1]
 
 
 def decompression(data):  # Your input string should be in format <'index', 'entry'>,... . Ex: <0,A><0,B><2,C>
@@ -124,29 +124,44 @@ def decompression(data):  # Your input string should be in format <'index', 'ent
 
 
 # driver code
-def main():
-
-    with open('input.txt', 'rb') as file:
-        text = file.read()
-
-    dictWithSymbols, encoded = compression(text)
-
-    with open('data.txt', 'w') as f:
-        f.write(encoded)
-
-    dump(dictWithSymbols)
-
-    #print(dictWithSymbols)
+def main(in_file, out_file, decomp = False):
     
-    dict = load("comp.bin")
 
-    print(parse(dict))
-    print(dict.numbers, dict.symbols)
+    if decomp:
+        dict = load(in_file)
+        error, decoded, dictWithSymbolsDECODED = decompression(dict)
+        with open(out_file, 'wb') as f:
+            f.write(bytes(decoded))
+    else:
+        with open('input.txt', 'rb') as file:
+            text = file.read()
+        dict, encoded = compression(text)
+        dump(dict, out_file)
 
-    error, decoded, dictWithSymbolsDECODED = decompression(dict)
-    with open('our.txt', 'wb') as f:
-        f.write(bytes(decoded))
+    
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process input and output files.")
+    parser.add_argument("input_file", help="Input file path")
+    parser.add_argument("-o", "--output_file", help="Output file path", default=None)
+    parser.add_argument("-r", "--reverse", help="Enable reverse mode", action="store_true")
+    args = parser.parse_args()
+
+    # Проверка существования входного файла
+    if not os.path.exists(args.input_file):
+        print(f"Error: Input file '{args.input_file}' does not exist.")
+        exit()
+
+    if args.output_file is None:
+        # Определение имени файла по умолчанию на основе наличия флага -r
+        default_output_file = args.input_file.split('.')[0]
+        if args.reverse:
+            default_output_file += '.out'
+        else:
+            default_output_file += '.cmp'
+        output_file = default_output_file
+    else:
+        output_file = args.output_file
+
+    main(args.input_file, output_file, args.reverse)

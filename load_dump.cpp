@@ -11,9 +11,9 @@ struct data
 
 extern "C"
 {
-    void my_dump(unsigned int* numbers, char* symbols, int size)
+    void my_dump(const char* file_out, unsigned int* numbers, char* symbols, int size)
     {        
-        FILE* out = fopen("comp.bin", "wb");
+        FILE* out = fopen(file_out, "wb");
         unsigned int size_elem = sizeof(int) + sizeof(char);
         
         char* buffer = (char*)calloc(size, size_elem);
