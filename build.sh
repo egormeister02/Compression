@@ -13,3 +13,7 @@ make install
 
 # Возвращаемся в исходную директорию
 cd ..
+
+pyinstaller --onefile source/compress.py 
+
+mv dist/compress ./

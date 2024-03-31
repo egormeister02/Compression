@@ -6,7 +6,7 @@ import ctypes
 if ctypes._os.name == 'nt':  # Если Windows
     my_lib = ctypes.CDLL('libs/libload_dump.dll')
 else:  # Если Unix
-    my_lib = ctypes.CDLL('libs/libload_dump.so')
+    my_lib = ctypes.CDLL('libs/libload_dump.a')
 
 class Data_c(ctypes.Structure):
     _fields_ = [("numbers", ctypes.POINTER(ctypes.c_int)),
@@ -78,11 +78,8 @@ def compression(string):  # string is your input text
         last_elem_del = 1
         
     dict['@@@@'] = [index + 1, [last_elem_del, 0]]
-    ans = ''
-    for x in dict:
-        ans += f'<{dict[x][1][0]}~{chr(dict[x][1][1])}>'
 
-    return dict, ans  # 'dict' is a dictionary of each symbol with its encoded value, 'ans' is a final encoded version of input
+    return dict  # 'dict' is a dictionary of each symbol with its encoded value, 'ans' is a final encoded version of input
 
 
 # This function is used to convert your inputed string into an usable dictionary object
@@ -133,9 +130,9 @@ def main(in_file, out_file, decomp = False):
         with open(out_file, 'wb') as f:
             f.write(bytes(decoded))
     else:
-        with open('input.txt', 'rb') as file:
+        with open(in_file, 'rb') as file:
             text = file.read()
-        dict, encoded = compression(text)
+        dict = compression(text)
         dump(dict, out_file)
 
     
@@ -159,7 +156,7 @@ if __name__ == "__main__":
         if args.reverse:
             default_output_file += '.out'
         else:
-            default_output_file += '.cmp'
+            default_output_file += '.bin'
         output_file = default_output_file
     else:
         output_file = args.output_file
