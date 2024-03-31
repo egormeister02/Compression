@@ -6,7 +6,7 @@ import ctypes
 if ctypes._os.name == 'nt':  # Если Windows
     my_lib = ctypes.CDLL('libs/libload_dump.dll')
 else:  # Если Unix
-    my_lib = ctypes.CDLL('libs/libload_dump.a')
+    my_lib = ctypes.CDLL('libs/libload_dump.so')
 
 class Data_c(ctypes.Structure):
     _fields_ = [("numbers", ctypes.POINTER(ctypes.c_int)),
@@ -152,11 +152,11 @@ if __name__ == "__main__":
 
     if args.output_file is None:
         # Определение имени файла по умолчанию на основе наличия флага -r
-        default_output_file = args.input_file.split('.')[0]
+        default_output_file = args.input_file
         if args.reverse:
-            default_output_file += '.out'
+            default_output_file = '.'.join(default_output_file.split('.')[:-2])
         else:
-            default_output_file += '.bin'
+            default_output_file += '.copress.bin'
         output_file = default_output_file
     else:
         output_file = args.output_file
